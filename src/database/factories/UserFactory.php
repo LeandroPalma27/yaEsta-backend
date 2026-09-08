@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
+use App\Modules\Auth\Infrastructure\Persistence\Models\UserModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 
 /**
- * @extends Factory<User>
+ * @extends Factory<UserModel>
  */
 class UserFactory extends Factory
 {
@@ -32,7 +32,7 @@ class UserFactory extends Factory
      */
     public function withPassword(string $password = 'password'): static
     {
-        return $this->afterCreating(function (User $user) use ($password) {
+        return $this->afterCreating(function (UserModel $user) use ($password) {
             $user->authAccounts()->create([
                 'provider' => 'password',
                 'provider_account_id' => null,

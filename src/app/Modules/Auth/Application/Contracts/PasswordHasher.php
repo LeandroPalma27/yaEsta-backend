@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Auth\Domain\Contracts;
+namespace App\Modules\Auth\Application\Contracts;
 
 interface PasswordHasher
 {

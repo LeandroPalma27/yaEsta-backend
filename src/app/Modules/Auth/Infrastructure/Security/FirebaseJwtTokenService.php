@@ -3,6 +3,8 @@
 namespace App\Modules\Auth\Infrastructure\Security;
 
 use App\Modules\Auth\Application\Contracts\JwtTokenServiceInterface;
+use App\Modules\Auth\Application\Contracts\TokenService;
+use App\Modules\Auth\Application\DTOs\AccessTokenClaims;
 use App\Modules\Auth\Application\DTOs\JwtClaims;
 use App\Modules\Auth\Application\Exceptions\AccessTokenExpiredException;
 use App\Modules\Auth\Application\Exceptions\InvalidAccessTokenException;
@@ -14,10 +16,10 @@ use LogicException;
 use Override;
 use UnexpectedValueException;
 
-class FirebaseJwtTokenService implements JwtTokenServiceInterface
+class FirebaseJwtTokenService implements TokenService
 {
     #[Override]
-    public function generateAccessToken(int $userId): string
+    public function generateAccessToken(int $userId, string $sessionUuid): string
     {
         $now = time();
 
@@ -42,7 +44,7 @@ class FirebaseJwtTokenService implements JwtTokenServiceInterface
     }
 
     #[Override]
-    public function parseAccessToken(string $token): JwtClaims
+    public function parseAccessToken(string $token): AccessTokenClaims
     {
         $key = new Key(
             $this->secret(),
@@ -73,7 +75,7 @@ class FirebaseJwtTokenService implements JwtTokenServiceInterface
             );
         }
 
-        return new JwtClaims(
+        return new AccessTokenClaims(
             userId: (int) $payload->sub,
             expiresAt: (int) $payload->exp,
             jti: (string) $payload->jti,

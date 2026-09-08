@@ -2,15 +2,12 @@
 
 namespace App\Modules\Auth\Infrastructure\Security;
 
-use App\Modules\Auth\Domain\Contracts\PasswordHasher;
+use App\Modules\Auth\Application\Contracts\PasswordHasher;
 use Illuminate\Contracts\Hashing\Hasher;
 use Override;
 
 class LaravelPasswordHasher implements PasswordHasher
 {
-    /**
-     * Inyeccion de dependencia de Iluminate - Hasher.
-     */
     public function __construct(private Hasher $hasher) {}
 
     #[Override]

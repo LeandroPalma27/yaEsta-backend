@@ -2,10 +2,8 @@
 
 namespace App\Modules\Auth\Infrastructure\Security;
 
-use App\Modules\Auth\Application\Contracts\JwtTokenServiceInterface;
 use App\Modules\Auth\Application\Contracts\TokenService;
 use App\Modules\Auth\Application\DTOs\AccessTokenClaims;
-use App\Modules\Auth\Application\DTOs\JwtClaims;
 use App\Modules\Auth\Application\Exceptions\AccessTokenExpiredException;
 use App\Modules\Auth\Application\Exceptions\InvalidAccessTokenException;
 use DomainException;
@@ -26,6 +24,9 @@ class FirebaseJwtTokenService implements TokenService
         $payload = [
             'iss' => $this->issuer(),
             'sub' => (string) $userId,
+
+            // Session ID
+            'sid' => $sessionUuid,
 
             'iat' => $now,
             'nbf' => $now,
@@ -66,7 +67,7 @@ class FirebaseJwtTokenService implements TokenService
         }
 
         if (
-            ! isset($payload->sub, $payload->exp, $payload->jti)
+            ! isset($payload->sub, $payload->sid, $payload->exp, $payload->jti)
             || ($payload->iss ?? null) !== $this->issuer()
             || ($payload->typ ?? null) !== 'access'
         ) {
@@ -77,6 +78,7 @@ class FirebaseJwtTokenService implements TokenService
 
         return new AccessTokenClaims(
             userId: (int) $payload->sub,
+            sessionUuid: (string) $payload->sid,
             expiresAt: (int) $payload->exp,
             jti: (string) $payload->jti,
         );

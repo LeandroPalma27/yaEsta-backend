@@ -6,6 +6,7 @@ final readonly class AccessTokenClaims
 {
     public function __construct(
         public int $userId,
+        public string $sessionUuid,
         public int $expiresAt,
         public string $jti,
     ) {}

@@ -2,8 +2,10 @@
 
 namespace App\Modules\Auth\Infrastructure\Providers;
 
+use App\Modules\Auth\Application\Contracts\LoginWithPassword;
 use App\Modules\Auth\Application\Contracts\PasswordHasher;
 use App\Modules\Auth\Application\Contracts\TokenService;
+use App\Modules\Auth\Application\UseCases\LoginWithPasswordUseCase;
 use App\Modules\Auth\Domain\Repositories\AuthAccountRepository;
 use App\Modules\Auth\Domain\Repositories\AuthSessionRepository;
 use App\Modules\Auth\Domain\Repositories\UserRepository;
@@ -41,6 +43,11 @@ class AuthServiceProvider extends ServiceProvider
         $this->app->bind(
             AuthSessionRepository::class,
             EloquentAuthSessionRepository::class,
+        );
+
+        $this->app->bind(
+            LoginWithPassword::class,
+            LoginWithPasswordUseCase::class,
         );
     }
 }

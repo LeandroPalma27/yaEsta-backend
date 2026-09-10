@@ -13,6 +13,7 @@ final class AuthSessionModel extends Model
         'public_id',
         'user_id',
         'refresh_token_hash',
+        'device_uuid',
         'expires_at',
         'revoked_at',
     ];

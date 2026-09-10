@@ -10,6 +10,7 @@ final class AuthSession
     private string $publicId;
     private int $userId;
     private string $refreshTokenHash;
+    private string $deviceUuid;
     private DateTimeImmutable $expiresAt;
     private ?DateTimeImmutable $revokedAt;
 
@@ -18,6 +19,7 @@ final class AuthSession
         string $publicId,
         int $userId,
         string $refreshTokenHash,
+        string $deviceUuid,
         DateTimeImmutable $expiresAt,
         ?DateTimeImmutable $revokedAt = null,
     ) {
@@ -25,6 +27,7 @@ final class AuthSession
         $this->publicId = $publicId;
         $this->userId = $userId;
         $this->refreshTokenHash = $refreshTokenHash;
+        $this->deviceUuid = $deviceUuid;
         $this->expiresAt = $expiresAt;
         $this->revokedAt = $revokedAt;
     }
@@ -47,6 +50,11 @@ final class AuthSession
     public function getRefreshTokenHash(): string
     {
         return $this->refreshTokenHash;
+    }
+
+    public function getDeviceUuid(): string
+    {
+        return $this->deviceUuid;
     }
 
     public function getExpiresAt(): DateTimeImmutable

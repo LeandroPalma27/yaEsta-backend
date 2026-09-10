@@ -2,6 +2,7 @@
 
 namespace App\Modules\Auth\Application\UseCases;
 
+use App\Modules\Auth\Application\Contracts\LoginWithPassword;
 use App\Modules\Auth\Application\Contracts\PasswordHasher;
 use App\Modules\Auth\Application\Contracts\TokenService;
 use App\Modules\Auth\Application\Exceptions\InvalidCredentialsException;
@@ -13,7 +14,7 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Illuminate\Support\Str;
 
-class LoginWithPasswordUseCase
+class LoginWithPasswordUseCase implements LoginWithPassword
 {
     /**
      * Create a new class instance.
@@ -31,6 +32,7 @@ class LoginWithPasswordUseCase
     public function execute(
         string $email,
         string $password,
+        string $deviceUuid,
     ): array {
 
         $user = $this->userRepository->findByEmail($email);
@@ -56,33 +58,59 @@ class LoginWithPasswordUseCase
             throw new InvalidCredentialsException("Credenciales inválidas.");
         }
 
-        $sessionUuid = (string) Str::uuid7();
+        $session = $this->authSessionRepository
+            ->findActiveByUserAndDevice(
+                userId: $user->getId(),
+                deviceUuid: $deviceUuid,
+            );
 
-        $refreshSecret = bin2hex(
-            random_bytes(32)
-        );
+        if (! $session) {
+
+            $sessionUuid = (string) Str::uuid7();
+
+            $expiresAt = new DateTimeImmutable(
+                '+30 days',
+                new DateTimeZone('UTC'),
+            );
+
+            $refreshSecret = bin2hex(
+                random_bytes(32)
+            );
+
+            $refreshTokenHash = hash(
+                'sha256',
+                $refreshSecret,
+            );
+
+            $session = $this->authSessionRepository->create(
+                publicId: $sessionUuid,
+                userId: $user->getId(),
+                deviceUuid: $deviceUuid,
+                refreshTokenHash: $refreshTokenHash,
+                expiresAt: $expiresAt,
+            );
+        } else {
+
+            $refreshSecret = bin2hex(
+                random_bytes(32)
+            );
+
+            $refreshTokenHash = hash(
+                'sha256',
+                $refreshSecret,
+            );
+
+            $this->authSessionRepository
+                ->updateRefreshTokenHash(
+                    sessionId: $session->getId(),
+                    refreshTokenHash: $refreshTokenHash,
+                );
+        }
 
         $refreshToken = sprintf(
             '%s.%s',
-            $sessionUuid,
+            $session->getPublicId(),
             $refreshSecret,
-        );
-
-        $refreshTokenSecret_hash = hash(
-            'sha256',
-            $refreshSecret,
-        );
-
-        $expiresAt = new DateTimeImmutable(
-            '+30 days',
-            new DateTimeZone('UTC'),
-        );
-
-        $session = $this->authSessionRepository->create(
-            publicId: $sessionUuid,
-            userId: $user->getId(),
-            refreshTokenHash: $refreshTokenSecret_hash,
-            expiresAt: $expiresAt,
         );
 
         $accessToken = $this->tokenService

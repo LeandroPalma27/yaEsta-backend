@@ -11,7 +11,6 @@ Route::get('/hola', function () {
 });
 
 Route::middleware('auth.jwt')->group(function () {
-
     Route::get('/test-auth', [TestController::class, 'test']);
 });
 

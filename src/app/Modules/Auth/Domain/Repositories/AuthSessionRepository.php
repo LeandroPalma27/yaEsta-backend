@@ -7,6 +7,12 @@ use DateTimeImmutable;
 
 interface AuthSessionRepository
 {
+    public function findActiveByUserAndDevice(int $userId, string $deviceUuid): ?AuthSession;
+
+    public function findByPublicId(
+        string $publicId,
+    ): ?AuthSession;
+
     public function create(
         string $publicId,
         int $userId,
@@ -15,7 +21,17 @@ interface AuthSessionRepository
         DateTimeImmutable $expiresAt,
     ): AuthSession;
 
-    public function findActiveByUserAndDevice(int $userId, string $deviceUuid): ?AuthSession;
-
     public function updateRefreshTokenHash(int $sessionId, string $refreshTokenHash): void;
+
+    public function rotateRefreshToken(
+        int $sessionId,
+        string $currentRefreshTokenHash,
+        string $newRefreshTokenHash,
+        DateTimeImmutable $expiresAt,
+    ): bool;
+
+    public function revokeByPublicIdAndUser(
+        string $publicId,
+        int $userId,
+    ): void;
 }
